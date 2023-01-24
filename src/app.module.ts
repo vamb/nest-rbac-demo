@@ -19,7 +19,7 @@ import { PrivilegeEntity } from "./privilege/entities/privilege.entity";
       port: 3306,
       username: 'root',
       password: 'root',
-      database: 'rabc',
+      database: 'rbac',
       entities: [ UserEntity, RoleEntity, PrivilegeEntity ],
       synchronize: false
     }),
