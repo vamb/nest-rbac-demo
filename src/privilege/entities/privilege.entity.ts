@@ -21,24 +21,24 @@ export class PrivilegeEntity {
   @Column({ type: "varchar", length: 50, nullable: false, name: 'path' })
   path: string;
 
-  @Column({ type: "int", nullable: false, name: 'sort', default: 0 })
+  @Column({ type: "int", nullable: true, name: 'sort', default: 0 })
   sort: number;
 
-  @Column({ type: "varchar", length: 50, nullable: false, name: 'icon' })
+  @Column({ type: "varchar", length: 50, nullable: true, name: 'icon' })
   icon: string;
 
-  @Column({ type: "datetime", nullable: false, name: 'create_time' })
+  @Column({ type: "datetime", nullable: true, name: 'create_time' })
   createTime: Date;
 
-  @Column({ type: "varchar", length: 50, nullable: false, name: 'create_by' })
+  @Column({ type: "varchar", length: 50, nullable: true, name: 'create_by' })
   createBy: string;
 
-  @Column({ type: "datetime", nullable: false, name: 'update_time' })
+  @Column({ type: "datetime", nullable: true, name: 'update_time' })
   updateTime: Date;
 
-  @Column({ type: "varchar", length: 50, nullable: false, name: 'update_by' })
+  @Column({ type: "varchar", length: 50, nullable: true, name: 'update_by' })
   updateBy: string;
 
-  @Column({ type: "int", nullable: false, name: 'level', default: 0 })
+  @Column({ type: "int", nullable: true, name: 'level', default: 0 })
   level: number;
 }

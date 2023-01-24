@@ -1,15 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { PrivilegeService } from './privilege.service';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
 
+import { PrivilegeValidationPipe } from "../common/pipe/privilege.validation.pipe";
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+
 @Controller('privilege')
+@UseGuards(JwtAuthGuard)
 export class PrivilegeController {
   constructor(private readonly privilegeService: PrivilegeService) {}
 
   @Post()
   create(@Body() createPrivilegeDto: CreatePrivilegeDto) {
     return this.privilegeService.create(createPrivilegeDto);
+  }
+
+  @Post('save')
+  async savePrivilege(@Body(new PrivilegeValidationPipe()) privilege: CreatePrivilegeDto){
+    return this.privilegeService.savePrivilege(privilege)
   }
 
   @Get()

@@ -1,10 +1,14 @@
-import { Module, NestModule } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
+import { AuthModule } from "./auth/auth.module";
 import { PrivilegeModule } from './privilege/privilege.module';
+
+// common
+import { LoggerMiddleware } from "./common/logger.middleware";
 
 // typeORM entity
 import { UserEntity } from './user/entities/user.entity'
@@ -13,6 +17,7 @@ import { PrivilegeEntity } from "./privilege/entities/privilege.entity";
 
 @Module({
   imports: [
+    UserModule, RoleModule, PrivilegeModule, AuthModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -23,11 +28,13 @@ import { PrivilegeEntity } from "./privilege/entities/privilege.entity";
       entities: [ UserEntity, RoleEntity, PrivilegeEntity ],
       synchronize: false
     }),
-    UserModule,
-    RoleModule,
-    PrivilegeModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(LoggerMiddleware)
+      .forRoutes('*')
+  }
+}

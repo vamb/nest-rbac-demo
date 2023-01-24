@@ -1,9 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository, Connection } from "typeorm";
+import { PrivilegeEntity } from "./entities/privilege.entity";
 
 @Injectable()
 export class PrivilegeService {
+  constructor(
+    @InjectRepository(PrivilegeEntity)
+    private privilegeRepository: Repository<PrivilegeEntity>,
+    private connection: Connection
+  ) {}
+
   create(createPrivilegeDto: CreatePrivilegeDto) {
     return 'This action adds a new privilege';
   }
@@ -22,5 +31,28 @@ export class PrivilegeService {
 
   remove(id: number) {
     return `This action removes a #${id} privilege`;
+  }
+
+  async savePrivilege(createPrivilegeDto: CreatePrivilegeDto) {
+    const privilegeEntity: PrivilegeEntity = {
+      id:  createPrivilegeDto.id,
+      pid: createPrivilegeDto.pid,
+      name: createPrivilegeDto.name,
+      code: createPrivilegeDto.code,
+      type: createPrivilegeDto.type,
+      path: createPrivilegeDto.path,
+      sort: createPrivilegeDto.sort || 0,
+      icon: createPrivilegeDto.icon,
+      createTime: createPrivilegeDto.createTime,
+      createBy: createPrivilegeDto.createBy,
+      updateTime: createPrivilegeDto.updateTime,
+      updateBy: createPrivilegeDto.updateBy,
+      level: createPrivilegeDto.level
+    }
+    return await this.privilegeRepository.createQueryBuilder()
+      .insert()
+      .into(PrivilegeEntity)
+      .values([privilegeEntity])
+      .execute()
   }
 }
