@@ -33,7 +33,8 @@ export class PrivilegeService {
     return `This action removes a #${id} privilege`;
   }
 
-  async savePrivilege(createPrivilegeDto: CreatePrivilegeDto) {
+  async savePrivilege(createPrivilegeDto: CreatePrivilegeDto, email: string) {
+    const newDate = new Date()
     const privilegeEntity: PrivilegeEntity = {
       id:  createPrivilegeDto.id,
       pid: createPrivilegeDto.pid,
@@ -43,10 +44,10 @@ export class PrivilegeService {
       path: createPrivilegeDto.path,
       sort: createPrivilegeDto.sort || 0,
       icon: createPrivilegeDto.icon,
-      createTime: createPrivilegeDto.createTime,
-      createBy: createPrivilegeDto.createBy,
-      updateTime: createPrivilegeDto.updateTime,
-      updateBy: createPrivilegeDto.updateBy,
+      createTime: createPrivilegeDto.createTime || newDate,
+      createBy: createPrivilegeDto.createBy || email,
+      updateTime: createPrivilegeDto.updateTime || newDate,
+      updateBy: createPrivilegeDto.updateBy || email,
       level: createPrivilegeDto.level
     }
     return await this.privilegeRepository.createQueryBuilder()
