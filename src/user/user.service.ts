@@ -22,8 +22,14 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    // return `This action returns a #${id} user`;
+    const user = await this.userRepository.createQueryBuilder()
+      .select("user")
+      .from(UserEntity, "user")
+      .where("user.id = :id", { id: id })
+      .getOne();
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
