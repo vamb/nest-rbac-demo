@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpStatus } from '@nestjs/common';
 import { PrivilegeService } from './privilege.service';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
@@ -27,8 +27,12 @@ export class PrivilegeController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.privilegeService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const rest = await this.privilegeService.findOne(+id);
+    return {
+      data: rest,
+      status: HttpStatus.OK
+    }
   }
 
   @Patch(':id')
@@ -37,7 +41,11 @@ export class PrivilegeController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.privilegeService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.privilegeService.remove(+id);
+    return {
+      data: null,
+      status: HttpStatus.OK
+    }
   }
 }

@@ -22,15 +22,22 @@ export class PrivilegeService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} privilege`;
+    // return `This action returns a #${id} privilege`;
+    const rest = this.connection.createQueryBuilder()
+      .select('privilege')
+      .from(PrivilegeEntity, 'privilege')
+      .where('privilege.id = :id', { id: id })
+      .getOne();
+    return rest
   }
 
   update(id: number, updatePrivilegeDto: UpdatePrivilegeDto) {
     return `This action updates a #${id} privilege`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} privilege`;
+  async remove(id: number) {
+    // return `This action removes a #${id} privilege`;
+    await this.privilegeRepository.delete(id)
   }
 
   async savePrivilege(createPrivilegeDto: CreatePrivilegeDto, email: string) {
