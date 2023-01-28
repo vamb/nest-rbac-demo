@@ -3,7 +3,6 @@ import { IsString, IsInt } from 'class-validator'
 export class CreatePrivilegeDto {
 
   id: number;
-
   pid: number;
 
   @IsString()
@@ -19,16 +18,10 @@ export class CreatePrivilegeDto {
   path: string;
 
   sort: number;
-
   icon: string;
-
   createTime: Date;
-
   createBy: string;
-
   updateTime: Date;
-
   updateBy: string;
-
   level: number;
 }

@@ -1,12 +1,24 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param,
-  Patch, Post, Request, UseGuards, Query } from '@nestjs/common';
-import { PrivilegeService } from './privilege.service';
-import { CreatePrivilegeDto } from './dto/create-privilege.dto';
-import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Request,
+  UseGuards
+} from '@nestjs/common';
+import {PrivilegeService} from './privilege.service';
+import {CreatePrivilegeDto} from './dto/create-privilege.dto';
+import {UpdatePrivilegeDto} from './dto/update-privilege.dto';
 
-import { PaginationDto } from "../common/dto/pagination.dto";
-import { PrivilegeValidationPipe } from "../common/pipe/privilege.validation.pipe";
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import {PaginationDto} from "../common/dto/pagination.dto";
+import {PrivilegeValidationPipe} from "../common/pipe/privilege.validation.pipe";
+import {JwtAuthGuard} from '../auth/jwt-auth.guard'
 
 @Controller('privilege')
 @UseGuards(JwtAuthGuard)
@@ -45,9 +57,32 @@ export class PrivilegeController {
     }
   }
 
+  // 增量更新
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePrivilegeDto: UpdatePrivilegeDto) {
-    return this.privilegeService.update(+id, updatePrivilegeDto);
+  patchUpdate(
+    @Param('id') id: string,
+    @Body() updatePrivilegeDto: UpdatePrivilegeDto,
+    @Request() req
+  ) {
+    const rest = this.privilegeService.putUpdate(+id, updatePrivilegeDto, req.user.email)
+    return {
+      data: '',
+      status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST
+    }
+  }
+
+  // 全量更新
+  @Put(':id')
+  putUpdate(
+    @Param('id') id: string,
+    @Body() updatePrivilegeDto: UpdatePrivilegeDto,
+    @Request() req
+  ) {
+    const rest = this.privilegeService.putUpdate(+id, updatePrivilegeDto, req.user.email)
+    return {
+      data: '',
+      status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST
+    }
   }
 
   @Delete(':id')

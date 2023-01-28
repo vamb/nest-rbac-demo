@@ -33,9 +33,9 @@ export class PrivilegeService {
     }
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     // return `This action returns a #${id} privilege`;
-    const rest = this.connection.createQueryBuilder()
+    const rest = await this.connection.createQueryBuilder()
       .select('privilege')
       .from(PrivilegeEntity, 'privilege')
       .where('privilege.id = :id', { id: id })
@@ -43,8 +43,72 @@ export class PrivilegeService {
     return rest
   }
 
-  update(id: number, updatePrivilegeDto: UpdatePrivilegeDto) {
-    return `This action updates a #${id} privilege`;
+  async checkCanUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto) {
+    const queryArray = []
+    if(updatePrivilegeDto.name){
+      queryArray.push({paramName: 'name', paramValue: updatePrivilegeDto.name})
+    }
+    if(updatePrivilegeDto.code){
+      queryArray.push({paramName: 'code', paramValue: updatePrivilegeDto.code})
+    }
+    if(updatePrivilegeDto.path){
+      queryArray.push({paramName: 'path', paramValue: updatePrivilegeDto.path})
+    }
+    if(Array.isArray(queryArray) && queryArray.length>0){
+      let whereQueryStr = ''
+      let whereQueryObj = {}
+      queryArray.map((item, idx)=>{
+        whereQueryStr = whereQueryStr + ` privilege.${item.paramName} = :${item.paramName} and `
+        whereQueryObj = {...whereQueryObj, ...{[item.paramName]: item.paramValue}}
+        if(idx === queryArray.length-1){
+          whereQueryStr = whereQueryStr + ' privilege.id != :id '
+          whereQueryObj = {...whereQueryObj, ...{id: id}}
+        }
+      })
+      const rest = await this.connection.createQueryBuilder()
+        .select('privilege')
+        .from(PrivilegeEntity, 'privilege')
+        .where(whereQueryStr, whereQueryObj)
+        .getOne()
+      return rest
+    }else{
+      throw new BadRequestException(`request param not correct ${JSON.stringify(updatePrivilegeDto)}`)
+    }
+  }
+
+  async patchUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto, currUserEmail: string) {
+    const newDate = new Date()
+    const targetObj = await this.findOne(id)
+    if(targetObj){
+      const ifExist = await this.checkCanUpdate(id, updatePrivilegeDto)
+      if(ifExist){
+        throw new BadRequestException(
+          `Request data duplicate code: ${updatePrivilegeDto.code}, name: ${updatePrivilegeDto.name}, path: ${updatePrivilegeDto.path}, id: ${id}`
+        )
+      }
+      return await this.privilegeRepository.createQueryBuilder()
+        .update()
+        .set({
+          pid: updatePrivilegeDto.pid || targetObj.pid,
+          name: updatePrivilegeDto.name || targetObj.name,
+          code: updatePrivilegeDto.code || targetObj.code,
+          type: updatePrivilegeDto.type || targetObj.type,
+          path: updatePrivilegeDto.path || targetObj.path,
+          sort: updatePrivilegeDto.sort || targetObj.sort,
+          icon: updatePrivilegeDto.icon || targetObj.icon,
+          updateTime: newDate,
+          updateBy: currUserEmail
+        })
+      .where("id = :id", {id: id})
+      .execute()
+    }else{
+      throw new BadRequestException(`Can not find data, id: ${id}`)
+    }
+  }
+
+  putUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto, currUserEmail: string) {
+    const newDate = new Date()
+    return `This action put updates a #${id} privilege`;
   }
 
   async remove(id: number) {
