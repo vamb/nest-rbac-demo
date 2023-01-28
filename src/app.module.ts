@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
 import { AuthModule } from "./auth/auth.module";
 import { PrivilegeModule } from './privilege/privilege.module';
+import { RolePrivilegeModule } from './entity.map/role.privilege/role.privilege.module';
 
 // common
 import { LoggerMiddleware } from "./common/logger.middleware";
@@ -14,10 +15,12 @@ import { LoggerMiddleware } from "./common/logger.middleware";
 import { UserEntity } from './user/entities/user.entity'
 import { RoleEntity } from "./role/entities/role.entity";
 import { PrivilegeEntity } from "./privilege/entities/privilege.entity";
+import { RolePrivilegeEntity } from './entity.map/role.privilege/entities/role.privilege.entity'
+
 
 @Module({
   imports: [
-    UserModule, RoleModule, PrivilegeModule, AuthModule,
+    UserModule, RoleModule, PrivilegeModule, AuthModule,RolePrivilegeModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -25,7 +28,7 @@ import { PrivilegeEntity } from "./privilege/entities/privilege.entity";
       username: 'root',
       password: 'root',
       database: 'rbac',
-      entities: [ UserEntity, RoleEntity, PrivilegeEntity ],
+      entities: [ UserEntity, RoleEntity, PrivilegeEntity, RolePrivilegeEntity ],
       synchronize: false
     }),
   ],

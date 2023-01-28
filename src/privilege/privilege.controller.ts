@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, HttpStatus } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param,
+  Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { PrivilegeService } from './privilege.service';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
@@ -18,7 +19,11 @@ export class PrivilegeController {
 
   @Post('save')
   async savePrivilege(@Body(new PrivilegeValidationPipe()) privilege: CreatePrivilegeDto, @Request() req){
-    return this.privilegeService.savePrivilege(privilege, req.user.email)
+    const rest: any = this.privilegeService.savePrivilege(privilege, req.user.email)
+    return {
+      data: '',
+      status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST
+    }
   }
 
   @Get()
