@@ -18,9 +18,7 @@ export class RoleController {
 
   @Post('save')
   async saveRole(@Body() createRoleDto: CreateRoleDto, @Request() request){
-    debugger
     const rest: any = await this.roleService.saveRole(createRoleDto, request)
-    debugger
     return {
       data: '',
       status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST

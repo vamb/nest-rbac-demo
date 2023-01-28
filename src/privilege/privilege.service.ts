@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
 import { InjectRepository } from "@nestjs/typeorm";
@@ -40,22 +40,38 @@ export class PrivilegeService {
     await this.privilegeRepository.delete(id)
   }
 
-  async savePrivilege(createPrivilegeDto: CreatePrivilegeDto, email: string) {
+  async findByNameOrCodeOrPath(createPrivilegeDto: CreatePrivilegeDto){
+    const queryObj = await this.privilegeRepository.createQueryBuilder()
+      .select('privilege')
+      .from(PrivilegeEntity, 'privilege')
+      .where('privilege.name = :name or privilege.code = :code or privilege.path = :path',
+        {name: createPrivilegeDto.name, code: createPrivilegeDto.code, path: createPrivilegeDto.path})
+      .getOne()
+    return queryObj
+  }
+
+  async savePrivilege(dto: CreatePrivilegeDto, email: string) {
+    const ifExist = await this.findByNameOrCodeOrPath(dto)
+    if(ifExist){
+      throw new BadRequestException(
+        `Request data duplicate code: ${dto.code}, name: ${dto.name}, path: ${dto.path}`)
+    }
+
     const newDate = new Date()
     const privilegeEntity: PrivilegeEntity = {
-      id:  createPrivilegeDto.id,
-      pid: createPrivilegeDto.pid,
-      name: createPrivilegeDto.name,
-      code: createPrivilegeDto.code,
-      type: createPrivilegeDto.type,
-      path: createPrivilegeDto.path,
-      sort: createPrivilegeDto.sort || 0,
-      icon: createPrivilegeDto.icon,
-      createTime: createPrivilegeDto.createTime || newDate,
-      createBy: createPrivilegeDto.createBy || email,
-      updateTime: createPrivilegeDto.updateTime || newDate,
-      updateBy: createPrivilegeDto.updateBy || email,
-      level: createPrivilegeDto.level
+      id:  dto.id,
+      pid: dto.pid,
+      name: dto.name,
+      code: dto.code,
+      type: dto.type,
+      path: dto.path,
+      sort: dto.sort || 0,
+      icon: dto.icon,
+      createTime: dto.createTime || newDate,
+      createBy: dto.createBy || email,
+      updateTime: dto.updateTime || newDate,
+      updateBy: dto.updateBy || email,
+      level: dto.level
     }
     return await this.privilegeRepository.createQueryBuilder()
       .insert()

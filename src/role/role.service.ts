@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Repository, Connection, EntityManager } from "typeorm";
@@ -35,6 +35,16 @@ export class RoleService {
     return `This action removes a #${id} role`;
   }
 
+  async findRoleByCodeOrName(createRoleDto: CreateRoleDto) {
+    const queryRole = await this.roleRepository.createQueryBuilder()
+      .select('role')
+      .from(RoleEntity, 'role')
+      .where("role.code = :code or role.name = :name ",
+        {code: createRoleDto.code, name: createRoleDto.name})
+      .getOne()
+    return queryRole
+  }
+
   async saveRole(createRoleDto: CreateRoleDto, request) {
     const newDate = new Date()
     const currentUser = request.user
@@ -49,6 +59,13 @@ export class RoleService {
       updateTime: newDate,
       updateBy: currentUser.email
     }
+
+    const ifExistRole = await this.findRoleByCodeOrName(createRoleDto)
+    if(ifExistRole){
+      throw new BadRequestException(
+        `Request data duplicate code: ${createRoleDto.code}, name: ${createRoleDto.name}`)
+    }
+
     const roleRepo = this.entityManager.getRepository(RoleEntity)
     const rolePrivilegeRepo = this.entityManager.getRepository(RolePrivilegeEntity)
 

@@ -19,7 +19,7 @@ export class PrivilegeController {
 
   @Post('save')
   async savePrivilege(@Body(new PrivilegeValidationPipe()) privilege: CreatePrivilegeDto, @Request() req){
-    const rest: any = this.privilegeService.savePrivilege(privilege, req.user.email)
+    const rest: any = await this.privilegeService.savePrivilege(privilege, req.user.email)
     return {
       data: '',
       status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST
