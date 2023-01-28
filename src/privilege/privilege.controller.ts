@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, HttpStatus, Param,
-  Patch, Post, Request, UseGuards } from '@nestjs/common';
+  Patch, Post, Request, UseGuards, Query } from '@nestjs/common';
 import { PrivilegeService } from './privilege.service';
 import { CreatePrivilegeDto } from './dto/create-privilege.dto';
 import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
 
+import { PaginationDto } from "../common/dto/pagination.dto";
 import { PrivilegeValidationPipe } from "../common/pipe/privilege.validation.pipe";
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
@@ -11,11 +12,6 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 @UseGuards(JwtAuthGuard)
 export class PrivilegeController {
   constructor(private readonly privilegeService: PrivilegeService) {}
-
-  @Post()
-  create(@Body() createPrivilegeDto: CreatePrivilegeDto) {
-    return this.privilegeService.create(createPrivilegeDto);
-  }
 
   @Post('save')
   async savePrivilege(@Body(new PrivilegeValidationPipe()) privilege: CreatePrivilegeDto, @Request() req){
@@ -26,9 +22,18 @@ export class PrivilegeController {
     }
   }
 
-  @Get()
-  findAll() {
-    return this.privilegeService.findAll();
+  @Get('all')
+  async findAll(@Query() paginationDto: PaginationDto) {
+    paginationDto.page = Number(paginationDto.page)
+    paginationDto.size = Number(paginationDto.size)
+    const result = await this.privilegeService.findAll({
+      ...paginationDto,
+      size: paginationDto.size < 10 ? 10: paginationDto.size
+    });
+    return {
+      data: result,
+      status: HttpStatus.OK
+    }
   }
 
   @Get(':id')

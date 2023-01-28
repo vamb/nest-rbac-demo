@@ -4,6 +4,8 @@ import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Connection } from "typeorm";
 import { PrivilegeEntity } from "./entities/privilege.entity";
+import { PaginationDto } from "../common/dto/pagination.dto";
+import { PaginationPrivilegeDto } from "./dto/pagination-privilege.dto";
 
 @Injectable()
 export class PrivilegeService {
@@ -13,12 +15,22 @@ export class PrivilegeService {
     private connection: Connection
   ) {}
 
-  create(createPrivilegeDto: CreatePrivilegeDto) {
-    return 'This action adds a new privilege';
-  }
+  async findAll(paginationDto: PaginationDto): Promise<PaginationPrivilegeDto> {
+    const skippedItems = (paginationDto.page - 1) * paginationDto.size
 
-  findAll() {
-    return `This action returns all privilege`;
+    const totalCount = await this.privilegeRepository.count()
+    const privileges = await this.privilegeRepository.createQueryBuilder()
+      .orderBy('id', 'ASC')
+      .offset(skippedItems)
+      .limit(paginationDto.size)
+      .getMany()
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      size: paginationDto.size,
+      list: privileges
+    }
   }
 
   findOne(id: number) {

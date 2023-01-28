@@ -29,6 +29,7 @@ import { RolePrivilegeEntity } from './entity.map/role.privilege/entities/role.p
       password: 'root',
       database: 'rbac',
       entities: [ UserEntity, RoleEntity, PrivilegeEntity, RolePrivilegeEntity ],
+      cache: true,
       synchronize: false
     }),
   ],
