@@ -47,10 +47,43 @@ export class RoleService {
       .getOne()
   }
 
+  checkCanUpdate = async (id: number, updateRoleDto: UpdateRoleDto) => {
+    const queryArray = []
+    if(updateRoleDto.name) {
+      queryArray.push({paramName: 'name', paramValue: updateRoleDto.name})
+    }
+    if(updateRoleDto.code) {
+      queryArray.push({paramName: 'code', paramValue: updateRoleDto.code})
+    }
+
+    let whereQueryStr = ''
+    let whereQueryObj = {}
+
+    if(Array.isArray(queryArray) && queryArray.length>0){
+      queryArray.map(item=>{
+        whereQueryStr = whereQueryStr + ` role.${item.paramName} = :${item.paramName} or `
+        whereQueryObj = {...whereQueryObj, ...{[item.paramName]: item.paramValue}}
+      })
+    }
+    whereQueryStr = whereQueryStr + ` role.id !=:id `
+    whereQueryObj = {...whereQueryObj, ...{id: id}}
+
+    const rest = await this.roleRepository.createQueryBuilder()
+      .select('role')
+      .from(RoleEntity, 'role')
+      .where(whereQueryStr, whereQueryObj)
+      .getOne()
+    return rest
+  }
+
   // 增量更新
   async patchUpdate(id: number, updateRoleDto: UpdateRoleDto, currUserEmail: string) {
     const targetRole = await this.findOne(id)
     if(targetRole){
+      const isExist = await this.checkCanUpdate(id, updateRoleDto)
+      if(isExist){
+        throw new BadRequestException(`Request data is duplicated with existing one`)
+      }
       return `This action patch updates a #${id} role ${currUserEmail}`;
     }else{
       throw new BadRequestException(`this data is not exist id: ${id}`)

@@ -46,35 +46,34 @@ export class PrivilegeService {
 
   async checkCanUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto) {
     const queryArray = []
-    if(updatePrivilegeDto.name){
+    if(updatePrivilegeDto.name) {
       queryArray.push({paramName: 'name', paramValue: updatePrivilegeDto.name})
     }
-    if(updatePrivilegeDto.code){
+    if(updatePrivilegeDto.code) {
       queryArray.push({paramName: 'code', paramValue: updatePrivilegeDto.code})
     }
-    if(updatePrivilegeDto.path){
+    if(updatePrivilegeDto.path) {
       queryArray.push({paramName: 'path', paramValue: updatePrivilegeDto.path})
     }
+
+    let whereQueryStr = ''
+    let whereQueryObj = {}
+
     if(Array.isArray(queryArray) && queryArray.length>0){
-      let whereQueryStr = ''
-      let whereQueryObj = {}
-      queryArray.map((item, idx)=>{
-        whereQueryStr = whereQueryStr + ` privilege.${item.paramName} = :${item.paramName} and `
+      queryArray.map(item=>{
+        whereQueryStr = whereQueryStr + ` privilege.${item.paramName} = :${item.paramName} or `
         whereQueryObj = {...whereQueryObj, ...{[item.paramName]: item.paramValue}}
-        if(idx === queryArray.length-1){
-          whereQueryStr = whereQueryStr + ' privilege.id != :id '
-          whereQueryObj = {...whereQueryObj, ...{id: id}}
-        }
       })
-      const rest = await this.connection.createQueryBuilder()
-        .select('privilege')
-        .from(PrivilegeEntity, 'privilege')
-        .where(whereQueryStr, whereQueryObj)
-        .getOne()
-      return rest
-    }else{
-      throw new BadRequestException(`request param not correct ${JSON.stringify(updatePrivilegeDto)}`)
     }
+    whereQueryStr = whereQueryStr + ' privilege.id != :id '
+    whereQueryObj = {...whereQueryObj, ...{id: id}}
+
+    const rest = await this.connection.createQueryBuilder()
+      .select('privilege')
+      .from(PrivilegeEntity, 'privilege')
+      .where(whereQueryStr, whereQueryObj)
+      .getOne()
+    return rest
   }
 
   // 增量更新
