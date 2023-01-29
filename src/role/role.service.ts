@@ -5,6 +5,8 @@ import { Repository, Connection, EntityManager } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { RoleEntity } from "./entities/role.entity";
 import { RolePrivilegeEntity } from "../entity.map/role.privilege/entities/role.privilege.entity";
+import { PaginationDto } from "../common/dto/pagination.dto";
+import { getSkippedItems } from "../common/utils/utils";
 
 @Injectable()
 export class RoleService {
@@ -19,20 +21,59 @@ export class RoleService {
     return 'This action adds a new role';
   }
 
-  findAll() {
-    return `This action returns all role`;
+  async findAll(paginationDto: PaginationDto) {
+    const skippedItems = getSkippedItems(paginationDto)
+
+    const totalCount = await this.roleRepository.count()
+    const roles = await this.roleRepository.createQueryBuilder()
+      .orderBy('id', 'DESC')
+      .offset(skippedItems)
+      .limit(paginationDto.size)
+      .getMany()
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      size: paginationDto.size,
+      list: roles
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: number) {
+    return await this.roleRepository.createQueryBuilder()
+      .select('role')
+      .from(RoleEntity, 'role')
+      .where('role.id = :id', {id: id})
+      .getOne()
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+  // 增量更新
+  async patchUpdate(id: number, updateRoleDto: UpdateRoleDto, currUserEmail: string) {
+    const targetRole = await this.findOne(id)
+    if(targetRole){
+      return `This action patch updates a #${id} role ${currUserEmail}`;
+    }else{
+      throw new BadRequestException(`this data is not exist id: ${id}`)
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  // 全量更新
+  async putUpdate(id: number, updateRoleDto: UpdateRoleDto, currUserEmail: string) {
+    const targetRole = await this.findOne(id)
+    if(targetRole){
+      return `This action put updates a #${id} role`;
+    }else{
+      throw new BadRequestException(`this data is not exist id: ${id}`)
+    }
+  }
+
+  async remove(id: number) {
+    const targetObj = await this.findOne(id)
+    if(targetObj){
+      await this.roleRepository.delete(id)
+    }else{
+      throw new BadRequestException(`this data is not exist id: ${id}`)
+    }
   }
 
   async findRoleByCodeOrName(createRoleDto: CreateRoleDto) {

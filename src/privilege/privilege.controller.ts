@@ -1,24 +1,14 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Put,
-  Query,
-  Request,
-  UseGuards
+  Body, Controller, Delete, Get, HttpStatus,
+  Param, Patch, Post, Put, Query, Request, UseGuards
 } from '@nestjs/common';
-import {PrivilegeService} from './privilege.service';
-import {CreatePrivilegeDto} from './dto/create-privilege.dto';
-import {UpdatePrivilegeDto} from './dto/update-privilege.dto';
+import { PrivilegeService } from './privilege.service';
+import { CreatePrivilegeDto } from './dto/create-privilege.dto';
+import { UpdatePrivilegeDto } from './dto/update-privilege.dto';
 
-import {PaginationDto} from "../common/dto/pagination.dto";
-import {PrivilegeValidationPipe} from "../common/pipe/privilege.validation.pipe";
-import {JwtAuthGuard} from '../auth/jwt-auth.guard'
+import { PaginationDto } from "../common/dto/pagination.dto";
+import { PrivilegeValidationPipe } from "../common/pipe/privilege.validation.pipe";
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 
 @Controller('privilege')
 @UseGuards(JwtAuthGuard)

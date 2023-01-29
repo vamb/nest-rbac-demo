@@ -6,6 +6,7 @@ import { Repository, Connection } from "typeorm";
 import { PrivilegeEntity } from "./entities/privilege.entity";
 import { PaginationDto } from "../common/dto/pagination.dto";
 import { PaginationPrivilegeDto } from "./dto/pagination-privilege.dto";
+import { getSkippedItems } from "../common/utils/utils";
 
 @Injectable()
 export class PrivilegeService {
@@ -16,11 +17,11 @@ export class PrivilegeService {
   ) {}
 
   async findAll(paginationDto: PaginationDto): Promise<PaginationPrivilegeDto> {
-    const skippedItems = (paginationDto.page - 1) * paginationDto.size
+    const skippedItems = getSkippedItems(paginationDto)
 
     const totalCount = await this.privilegeRepository.count()
     const privileges = await this.privilegeRepository.createQueryBuilder()
-      .orderBy('id', 'ASC')
+      .orderBy('id', 'DESC')
       .offset(skippedItems)
       .limit(paginationDto.size)
       .getMany()
@@ -147,8 +148,12 @@ export class PrivilegeService {
   }
 
   async remove(id: number) {
-    // return `This action removes a #${id} privilege`;
-    await this.privilegeRepository.delete(id)
+    const targetObj = await this.findOne(id)
+    if(targetObj){
+      await this.privilegeRepository.delete(id)
+    }else{
+      throw new BadRequestException(`this data is not exist id: ${id}`)
+    }
   }
 
   async findByNameOrCodeOrPath(createPrivilegeDto: CreatePrivilegeDto){
