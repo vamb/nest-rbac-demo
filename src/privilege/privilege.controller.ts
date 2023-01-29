@@ -64,7 +64,7 @@ export class PrivilegeController {
     @Body() updatePrivilegeDto: UpdatePrivilegeDto,
     @Request() req
   ) {
-    const rest = this.privilegeService.putUpdate(+id, updatePrivilegeDto, req.user.email)
+    const rest = this.privilegeService.patchUpdate(+id, updatePrivilegeDto, req.user.email)
     return {
       data: '',
       status: rest? HttpStatus.OK: HttpStatus.BAD_REQUEST

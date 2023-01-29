@@ -76,6 +76,7 @@ export class PrivilegeService {
     }
   }
 
+  // 增量更新
   async patchUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto, currUserEmail: string) {
     const newDate = new Date()
     const targetObj = await this.findOne(id)
@@ -106,9 +107,43 @@ export class PrivilegeService {
     }
   }
 
-  putUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto, currUserEmail: string) {
+  // 全量更新
+  async putUpdate(id: number, updatePrivilegeDto: UpdatePrivilegeDto, currUserEmail: string) {
+    if(!updatePrivilegeDto?.name){
+      throw new BadRequestException(`name can not be null`)
+    }else if(!updatePrivilegeDto?.code){
+      throw new BadRequestException(`code can not be null`)
+    }else if(!updatePrivilegeDto?.path){
+      throw new BadRequestException(`path can not be null`)
+    }
+
     const newDate = new Date()
-    return `This action put updates a #${id} privilege`;
+    const targetObj = await this.findOne(id)
+    if(targetObj){
+      const ifExist = await this.checkCanUpdate(id, updatePrivilegeDto)
+      if(ifExist){
+        throw new BadRequestException(
+          `Request data duplicate code: ${updatePrivilegeDto.code}, name: ${updatePrivilegeDto.name}, path: ${updatePrivilegeDto.path}, id: ${id}`
+        )
+      }
+      return await this.privilegeRepository.createQueryBuilder()
+        .update()
+        .set({
+          pid: updatePrivilegeDto.pid,
+          name: updatePrivilegeDto.name,
+          code: updatePrivilegeDto.code,
+          type: updatePrivilegeDto.type,
+          path: updatePrivilegeDto.path,
+          sort: updatePrivilegeDto.sort,
+          icon: updatePrivilegeDto.icon,
+          updateTime: newDate,
+          updateBy: currUserEmail
+        })
+        .where("id = :id", {id: id})
+        .execute()
+    }else{
+      throw new BadRequestException(`Can not find data, id: ${id}`)
+    }
   }
 
   async remove(id: number) {
