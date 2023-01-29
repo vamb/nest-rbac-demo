@@ -16,6 +16,10 @@ export class PrivilegeService {
     private connection: Connection
   ) {}
 
+  async test() {
+    return await this.connection.manager.find(PrivilegeEntity);
+  }
+
   async findAll(paginationDto: PaginationDto): Promise<PaginationPrivilegeDto> {
     const skippedItems = getSkippedItems(paginationDto)
 

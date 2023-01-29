@@ -15,6 +15,11 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 export class PrivilegeController {
   constructor(private readonly privilegeService: PrivilegeService) {}
 
+  @Get('test')
+  async test(){
+    return await this.privilegeService.test()
+  }
+
   @Post('save')
   async savePrivilege(@Body(new PrivilegeValidationPipe()) privilege: CreatePrivilegeDto, @Request() req){
     const rest: any = await this.privilegeService.savePrivilege(privilege, req.user.email)
