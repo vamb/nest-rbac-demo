@@ -26,7 +26,7 @@ import { RolePrivilegeEntity } from './entity.map/role.privilege/entities/role.p
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: 'root',
+      password: 'vamb',
       database: 'rbac',
       entities: [ UserEntity, RoleEntity, PrivilegeEntity, RolePrivilegeEntity ],
       cache: true,

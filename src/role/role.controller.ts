@@ -23,7 +23,7 @@ export class RoleController {
     }
   }
 
-  @Get('all')
+  @Get('list')
   async findAll(@Query() paginationDto: PaginationDto) {
     paginationDto.page = Number(paginationDto.page)
     paginationDto.size = Number(paginationDto.size)

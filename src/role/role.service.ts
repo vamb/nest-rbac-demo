@@ -60,12 +60,15 @@ export class RoleService {
     let whereQueryObj = {}
 
     if(Array.isArray(queryArray) && queryArray.length>0){
-      queryArray.map(item=>{
-        whereQueryStr = whereQueryStr + ` role.${item.paramName} = :${item.paramName} or `
+      queryArray.map((item, idx)=>{
+        whereQueryStr = whereQueryStr + ` role.${item.paramName} = :${item.paramName} `
         whereQueryObj = {...whereQueryObj, ...{[item.paramName]: item.paramValue}}
+        if(idx !== queryArray.length-1){
+          whereQueryStr = whereQueryStr + ' or '
+        }
       })
     }
-    whereQueryStr = whereQueryStr + ` role.id !=:id `
+    whereQueryStr = ` (${whereQueryStr}) and role.id !=:id`
     whereQueryObj = {...whereQueryObj, ...{id: id}}
 
     const rest = await this.roleRepository.createQueryBuilder()
@@ -84,7 +87,19 @@ export class RoleService {
       if(isExist){
         throw new BadRequestException(`Request data is duplicated with existing one`)
       }
-      return `This action patch updates a #${id} role ${currUserEmail}`;
+      const newDate = new Date()
+
+      return await this.roleRepository.createQueryBuilder()
+          .update()
+          .set({
+            code: updateRoleDto.code,
+            name: updateRoleDto.name,
+            description: updateRoleDto.description,
+            updateTime: newDate,
+            updateBy: currUserEmail
+          })
+          .where("id = :id", {id: id})
+          .execute()
     }else{
       throw new BadRequestException(`this data is not exist id: ${id}`)
     }
